@@ -1,0 +1,17 @@
+-- CREATE OR REPLACE VIEW v_factura_detalle AS
+-- SELECT 
+--     fa.id, 
+--     fa.client_id, 
+--     cli.name AS client_name, 
+--     cli.email, 
+--     fa.project_id, 
+--     pr.name AS project_name, 
+--     fa.issue_date, 
+--     fa.due_date, 
+--     fa.total_amount, 
+--     fa.status
+-- FROM `gestionsystem_lvl9`.`facturas` fa
+-- INNER JOIN `gestionsystem_lvl9`.`clientes` cli
+--     ON cli.id = fa.client_id
+-- INNER JOIN `gestionsystem_lvl9`.`proyectos` pr
+--     ON pr.id = fa.project_id;

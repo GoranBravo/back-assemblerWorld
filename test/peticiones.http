@@ -1,0 +1,28 @@
+@usersp = http://localhost:3000/user/usersp
+@login = http://localhost:3000/user/login
+# @getMateriasId= http://localhost:3000/user/getMateriasId
+
+POST {{login}}
+Content-Type: application/json
+
+{
+    "email" : "goran@email.com",
+    "password" : "4321"
+}
+
+###
+POST {{usersp}}
+#header
+Content-Type: application/json
+#body
+
+{
+    "email" : "goran@email.com",
+    "nombre" : "Goran",
+    "password" : "4321"
+}
+
+
+# ###
+# GET {{getMateriasId}}
+# auth : eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkbmkiOiI0IiwiaWF0IjoxNzE3NTg5NTczLCJleHAiOjMuNmUrMzB9._jOc2d9Lf1xneKzAeSoLo7izPJeHnwngbYVu730TPDA
