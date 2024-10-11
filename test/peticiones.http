@@ -28,23 +28,23 @@ Content-Type: application/json
 POST {{saveMarker}}
 #header
 Content-Type: application/json
-auth : eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFkbWluIiwiaWF0IjoxNzI4NjA4MTI3LCJleHAiOjMuNmUrMzB9.q8qvaB-wssHnZRXDh77FykyOm8DaZDoQRSvM5KUs0Rs
+auth : eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFkbWluIiwiaWF0IjoxNzI4NjY5ODYxLCJleHAiOjMuNmUrMzB9.wtpa86BtgJnZ_EVppj1Ltz7GlI_X6Ih4FxGmr1q2RVo
 #body
 
 {
     "userId" : "3",
-    "link" : "http://localhost:3000/user/login"
+    "link" : "/RegisterScreen"
 }
 
 ###
 POST {{deleteMarker}}
 #header
 Content-Type: application/json
-auth : eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFkbWluIiwiaWF0IjoxNzI4NjA4MTI3LCJleHAiOjMuNmUrMzB9.q8qvaB-wssHnZRXDh77FykyOm8DaZDoQRSvM5KUs0Rs
+auth : eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFkbWluIiwiaWF0IjoxNzI4NjY5ODYxLCJleHAiOjMuNmUrMzB9.wtpa86BtgJnZ_EVppj1Ltz7GlI_X6Ih4FxGmr1q2RVo
 #body
 
 {
-    "markerId" : "2",
+    "markerId" : "4",
     "userId" : "3"
 }
 
@@ -52,9 +52,8 @@ auth : eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFkbWluIiwiaWF0IjoxNzI4
 GET {{getMarkers}}
 #header
 Content-Type: application/json
-auth : eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFkbWluIiwiaWF0IjoxNzI4NjA4MTI3LCJleHAiOjMuNmUrMzB9.q8qvaB-wssHnZRXDh77FykyOm8DaZDoQRSvM5KUs0Rs
 #body
 
 {
-    "userId" : "3"
+    "email" : "admin"
 }

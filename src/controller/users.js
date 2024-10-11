@@ -141,18 +141,23 @@ export const deleteMarker = async (req, res) => {
 
 export const getUserMarkers = async (req, res) => {
   try {
-    const { userId } = req.body;
+    const { email } = req.query;  
     const cnn = await connect();
 
-    const query = `SELECT * FROM marcadores WHERE user_id = ?`;
-    const [markers] = await cnn.query(query, [userId]);
-
-    if (markers.length === 0) {
-      return res.status(404).json({ message: "No se encontraron marcadores para este usuario", success: false });
+    const [result] = await cnn.query(`SELECT id FROM usuarios WHERE email=?`, [email]);
+    if (result.length === 0) {
+      return res.status(404).json({ message: "Usuario no encontrado", success: false });
     }
 
-    return res.status(200).json({ message: "Marcadores obtenidos correctamente", success: true, data: markers });
+    const userId = result[0].id;
+    const [markers] = await cnn.query(`SELECT * FROM marcadores WHERE user_id=?`, [userId]);
+
+    if (markers.length === 0) {
+      return res.status(404).json({ message: "No se encontraron marcadores", success: false });
+    }
+
+    return res.status(200).json({ message: "Marcadores obtenidos", success: true, markers });
   } catch (error) {
-    return res.status(500).json({ message: "Error en el servidor", success: false, error: error });
+    return res.status(500).json({ message: "Error en el servidor", success: false, error });
   }
 };

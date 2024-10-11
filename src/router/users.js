@@ -45,6 +45,6 @@ routerUsers.post("/user/deleteMarker", auth, deleteMarker);
  *  get:
  *      sumary: get markers
  */
-routerUsers.get("/user/getMarkers", auth, getUserMarkers);
+routerUsers.get("/user/getMarkers", getUserMarkers);
 
 export default routerUsers;
