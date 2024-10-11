@@ -1,5 +1,3 @@
-//archivo de configuración de la documentación
-
 export const options = {
   definition: {
     info: {
