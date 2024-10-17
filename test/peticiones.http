@@ -2,6 +2,7 @@
 @login = http://localhost:3000/user/login
 @saveMarker = http://localhost:3000/user/saveMarker
 @deleteMarker = http://localhost:3000/user/deleteMarker
+@linkMarker = http://localhost:3000/user/linkMarker
 @getMarkers = http://localhost:3000/user/getMarkers
 
 POST {{login}}
@@ -32,8 +33,8 @@ auth : eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFkbWluIiwiaWF0IjoxNzI4
 #body
 
 {
-    "userId" : "3",
-    "link" : "/RegisterScreen"
+    "nombre" : "Register",
+    "link" : "/LoginScreen"
 }
 
 ###
@@ -44,14 +45,25 @@ auth : eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFkbWluIiwiaWF0IjoxNzI4
 #body
 
 {
-    "markerId" : "4",
-    "userId" : "3"
+    "markerId" : "4"    
+}
+
+###
+POST {{linkMarker}}
+#header
+Content-Type: application/json
+auth : eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFkbWluIiwiaWF0IjoxNzI4NjY5ODYxLCJleHAiOjMuNmUrMzB9.wtpa86BtgJnZ_EVppj1Ltz7GlI_X6Ih4FxGmr1q2RVo
+#body
+
+{
+    "markerId" : "9"
 }
 
 ###
 GET {{getMarkers}}
 #header
 Content-Type: application/json
+auth: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFkbWluIiwiaWF0IjoxNzI5MDgyMzIxLCJleHAiOjE3MzAyOTE5MjF9.c-umqzl99Rxnq_hMBVdsbt6YOXbU4gKCXCI78Xw_NHs
 #body
 
 {

@@ -1,7 +1,7 @@
 //archivo para manejar las rutas de usuarios
 
 import { Router } from "express";
-import { auth, createUsers, deleteMarker, getUserMarkers, logIn, saveMarker} from "../controller/users";
+import { auth, createUsers, deleteMarker, getUserMarkers, logIn, saveMarker, linkMarker} from "../controller/users";
 
 //objeto para manejo de url
 const routerUsers = Router();
@@ -41,10 +41,18 @@ routerUsers.post("/user/deleteMarker", auth, deleteMarker);
 
 /**
  * @swagger
+ * /linkMarker:
+ *  post:
+ *      sumary: link markers
+ */
+routerUsers.post("/user/linkMarker", auth, linkMarker);
+
+/**
+ * @swagger
  * /getUserMarker:
  *  get:
  *      sumary: get markers
  */
-routerUsers.get("/user/getMarkers", getUserMarkers);
+routerUsers.get("/user/getMarkers", auth, getUserMarkers);
 
 export default routerUsers;

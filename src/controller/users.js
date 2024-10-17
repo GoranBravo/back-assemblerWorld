@@ -14,15 +14,15 @@ export const logIn = async (req, res) => {
         const token = getToken({ email: email });
         return res
           .status(200)
-          .json({ message: "correcto", success: true, token: token });
+          .json({ message: "Correcto", success: true, token: token });
       } else {
-        return res.status(400).json({ message: "la contraseña no coincide", success: false });
+        return res.status(400).json({ message: "La contraseña no coincide", success: false });
       }
     } else {
-      return res.status(400).json({ message: "el usuario no existe", success: false });
+      return res.status(400).json({ message: "El usuario no existe", success: false });
     }
   } catch (error) {
-    res.status(500).json({ message: "fallo en catch", success: false, error: error });
+    res.status(500).json({ message: "Fallo en catch", success: false, error: error });
   }
 };
 
@@ -65,10 +65,11 @@ export const createUsers = async (req, res) => {
 
 export const auth = (req, res, next) => {
   const tokenFront = req.headers["auth"];
+  
   if (!tokenFront) return res.status(400).json({ message: "no hay token" });
   jwt.verify(tokenFront, claveSecreta, (error, payload) => {
     if (error) {
-      return res.status(400).json({ message: "el token no es valido" });
+      return res.status(400).json({ message: "El token no es valido" });
     } else {
       req.payload = payload;
       next();
@@ -77,31 +78,24 @@ export const auth = (req, res, next) => {
 };
 
 const getToken = (payload) => {
-  const token = jwt.sign(payload, claveSecreta, { expiresIn: "1000000000000000000000000000h" });
+  const token = jwt.sign(payload, claveSecreta, { expiresIn: "14d" });
   return token;
 };
 
 export const saveMarker = async (req, res) => {
   try {
-    const { userId, link } = req.body;
+    const { nombre, link } = req.body;
     const cnn = await connect();
 
-    const userQuery = `SELECT * FROM usuarios WHERE id=?`;
-    const [userResult] = await cnn.query(userQuery, [userId]);
-
-    if (userResult.length === 0) {
-      return res.status(404).json({ message: "Usuario no encontrado", success: false });
-    }
-
-    const markerQuery = `SELECT * FROM marcadores WHERE user_id = ? AND link = ?`;
-    const [markerResult] = await cnn.query(markerQuery, [userId, link]);
+    const markerQuery = `SELECT * FROM marcadores WHERE link = ?`;
+    const [markerResult] = await cnn.query(markerQuery, [link]);
 
     if (markerResult.length > 0) {
       return res.status(400).json({ message: "El marcador ya existe", success: false });
     }
 
-    const insertMarkerQuery = `INSERT INTO marcadores (user_id, link) VALUES (?, ?)`;
-    const [result] = await cnn.query(insertMarkerQuery, [userId, link]);
+    const insertMarkerQuery = `INSERT INTO marcadores (nombre, link) VALUES (?, ?)`;
+    const [result] = await cnn.query(insertMarkerQuery, [nombre, link]);
 
     if (result.affectedRows === 1) {
       return res.status(200).json({ message: "Marcador guardado correctamente", success: true });
@@ -116,18 +110,18 @@ export const saveMarker = async (req, res) => {
 
 export const deleteMarker = async (req, res) => {
   try {
-    const { markerId, userId } = req.body;
     const cnn = await connect();
+    const { markerId } = req.body;
 
-    const markerQuery = `SELECT * FROM marcadores WHERE id = ? AND user_id = ?`;
-    const [markerResult] = await cnn.query(markerQuery, [markerId, userId]);
+    const markerQuery = `SELECT * FROM marcadores WHERE id = ?`;
+    const [markerResult] = await cnn.query(markerQuery, [markerId]);
 
     if (markerResult.length === 0) {
-      return res.status(404).json({ message: "Marcador no encontrado o no pertenece al usuario", success: false });
+      return res.status(404).json({ message: "Marcador no encontrado", success: false });
     }
 
-    const deleteQuery = `DELETE FROM marcadores WHERE id = ? AND user_id = ?`;
-    const [result] = await cnn.query(deleteQuery, [markerId, userId]);
+    const deleteQuery = `DELETE FROM marcadores WHERE id = ?`;
+    const [result] = await cnn.query(deleteQuery, [markerId]);
 
     if (result.affectedRows === 1) {
       return res.status(200).json({ message: "Marcador eliminado correctamente", success: true });
@@ -140,8 +134,9 @@ export const deleteMarker = async (req, res) => {
 };
 
 export const getUserMarkers = async (req, res) => {
-  try {
-    const { email } = req.query;  
+  try {    
+    const email = req.payload.email;
+    
     const cnn = await connect();
 
     const [result] = await cnn.query(`SELECT id FROM usuarios WHERE email=?`, [email]);
@@ -150,7 +145,15 @@ export const getUserMarkers = async (req, res) => {
     }
 
     const userId = result[0].id;
-    const [markers] = await cnn.query(`SELECT * FROM marcadores WHERE user_id=?`, [userId]);
+    const [idMarkers] = await cnn.query(`SELECT marcador_id FROM usuario_marcador WHERE usuario_id=?`, [userId]);
+    
+    if (idMarkers.length === 0) {
+      return res.status(404).json({ message: "El usuario no tiene marcadores", success: false });
+    }
+
+    const markerIds = idMarkers.map(marker => marker.marcador_id)
+
+    const [markers] = await cnn.query(`SELECT * FROM marcadores WHERE id IN (?)`, [markerIds]);
 
     if (markers.length === 0) {
       return res.status(404).json({ message: "No se encontraron marcadores", success: false });
@@ -159,5 +162,46 @@ export const getUserMarkers = async (req, res) => {
     return res.status(200).json({ message: "Marcadores obtenidos", success: true, markers });
   } catch (error) {
     return res.status(500).json({ message: "Error en el servidor", success: false, error });
+  }
+};
+
+export const linkMarker = async (req, res) => {
+  try {
+    const { email } = req.payload;
+    const { markerId } = req.body;
+    const cnn = await connect();
+
+    const [userResult] = await cnn.query(`SELECT id FROM usuarios WHERE email=?`, [email]);
+    if (userResult.length === 0) {
+      return res.status(404).json({ message: "Usuario no encontrado", success: false });
+    }
+    const userId = userResult[0].id;
+
+    const markerQuery = `SELECT * FROM usuario_marcador WHERE usuario_id = ? AND marcador_id = ?`;
+    const [markerResult] = await cnn.query(markerQuery, [userId, markerId]);
+    
+    if (markerResult.length > 0) {
+      const deleteMarkerQuery = `DELETE FROM usuario_marcador WHERE usuario_id = ? AND marcador_id = ?`;
+      await cnn.query(deleteMarkerQuery, [userId, markerId]);
+      const checkQuery = `SELECT * FROM usuario_marcador WHERE usuario_id = ? AND marcador_id = ?`;
+      const [checkResult] = await cnn.query(checkQuery, [userId, markerId]);
+
+      if (checkResult.length === 0) {
+          return res.status(200).json({ message: "Marcador desvinculado correctamente", success: true });
+      } else {
+          return res.status(500).json({ message: "Error al desvincular el marcador", success: false });
+      }
+    }
+
+    const insertMarkerQuery = `INSERT INTO usuario_marcador (usuario_id, marcador_id) VALUES (?, ?)`;
+    const [result] = await cnn.query(insertMarkerQuery, [userId, markerId]);
+
+    if (result.affectedRows === 1) {
+      return res.status(200).json({ message: "Marcador vinculado correctamente", success: true });
+    } else {
+      return res.status(500).json({ message: "Error al vincular el marcador", success: false });
+    }
+  } catch (error) {
+    return res.status(500).json({ message: "Error en el servidor", success: false, error: error });
   }
 };
