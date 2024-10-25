@@ -84,26 +84,29 @@ const getToken = (payload) => {
 
 export const saveMarker = async (req, res) => {
   try {
-    const { nombre, link } = req.body;
+    const { markerLink, nombre } = req.body;
     const cnn = await connect();
 
     const markerQuery = `SELECT * FROM marcadores WHERE link = ?`;
-    const [markerResult] = await cnn.query(markerQuery, [link]);
+    const [markerResult] = await cnn.query(markerQuery, [markerLink]);
+    const markerId1 = markerResult[0].id
 
     if (markerResult.length > 0) {
-      return res.status(400).json({ message: "El marcador ya existe", success: false });
+      return res.status(400).json({ message: "El marcador ya existe", success: false, markerId: markerId1 });
     }
 
     const insertMarkerQuery = `INSERT INTO marcadores (nombre, link) VALUES (?, ?)`;
-    const [result] = await cnn.query(insertMarkerQuery, [nombre, link]);
+    const [result] = await cnn.query(insertMarkerQuery, [nombre, markerLink]);
 
     if (result.affectedRows === 1) {
-      return res.status(200).json({ message: "Marcador guardado correctamente", success: true });
+      const [markerId] = await cnn.query(markerQuery, [markerLink]);
+      const markerId0 = markerId[0].id
+      return res.status(200).json({ message: "Marcador guardado correctamente", success: true, markerId: markerId0});
     } else {
-      return res.status(500).json({ message: "Error al guardar el marcador", success: false });
+      return res.status(500).json({ message: "Error al guardar el marcador", success: false, markerId: -1 });
     }
   } catch (error) {
-    return res.status(500).json({ message: "Error en el servidor", success: false, error: error });
+    return res.status(500).json({ message: "Error en el servidor", success: false, markerId: -1, error: error });
   }
 };
 
@@ -173,7 +176,7 @@ export const linkMarker = async (req, res) => {
 
     const [userResult] = await cnn.query(`SELECT id FROM usuarios WHERE email=?`, [email]);
     if (userResult.length === 0) {
-      return res.status(404).json({ message: "Usuario no encontrado", success: false });
+      return res.status(404).json({ message: "Error: Usuario no encontrado", success: false });
     }
     const userId = userResult[0].id;
 
@@ -200,6 +203,84 @@ export const linkMarker = async (req, res) => {
       return res.status(200).json({ message: "Marcador vinculado correctamente", success: true });
     } else {
       return res.status(500).json({ message: "Error al vincular el marcador", success: false });
+    }
+  } catch (error) {
+    return res.status(500).json({ message: "Error en el servidor", success: false, error: error });
+  }
+};
+
+export const taskUpload = async (req, res) => {
+  try {
+    const { title, content } = req.body;
+    const { email } = req.payload
+    const cnn = await connect();
+
+    const [userResult] = await cnn.query(`SELECT id FROM usuarios WHERE email=?`, [email]);
+    if (userResult.length === 0) {
+      return res.status(404).json({ message: "Error: Usuario no encontrado", success: false });
+    }
+    const userId = userResult[0].id;
+
+    const titleQuery = `SELECT * FROM tareas WHERE title = ?`;
+    const [markerResult] = await cnn.query(titleQuery, [title]);
+
+    if (markerResult.length > 0) {
+      return res.status(400).json({ message: "La tarea ya existe", success: false });
+    }
+
+    const insertTitleQuery = `INSERT INTO tareas (title, content, userId) VALUES (?, ?, ?)`;
+    const [result] = await cnn.query(insertTitleQuery, [title, content, userId]);
+
+    if (result.affectedRows === 1) {
+      return res.status(200).json({ message: "Tarea publicada correctamente", success: true});
+    } else {
+      return res.status(500).json({ message: "Error al publicar la tarea", success: false,});
+    }
+  } catch (error) {
+    return res.status(500).json({ message: "Error en el servidor", success: false, error: error });
+  }
+};
+
+export const taskDeleate = async (req, res) => {
+  try {
+    const cnn = await connect();
+    const { idTask } = req.body;
+    const { email } = req.payload;
+
+    const taskQuery = `SELECT * FROM tareas WHERE id = ?`;
+    const [taskResult] = await cnn.query(taskQuery, [idTask]);
+    if (taskResult.length === 0) {
+      return res.status(404).json({ message: "Tarea no encontrada", success: false });
+    }
+
+    const [userResult] = await cnn.query(`SELECT id FROM usuarios WHERE email=?`, [email]);
+    if (userResult.length === 0) {
+      return res.status(404).json({ message: "Error: Usuario no encontrado", success: false });
+    }
+    const userId = userResult[0].id;
+
+    const [userRolResult] = await cnn.query(`SELECT rol_id FROM usuarios WHERE id=?`, [userId]);
+    const userRol = userRolResult[0].rol_id;
+
+    const [userTaskResult] = await cnn.query(`SELECT userId FROM tareas WHERE id=?`, [idTask]);
+    if (userTaskResult.length === 0) {
+      return res.status(404).json({ message: "Error: No se encontro el usuario creador.", success: false });
+    }
+    const creatorId = userTaskResult[0].id;
+
+    let userIsCreator = false;
+    if (creatorId == userId){
+      userIsCreator = true
+    }
+
+    if (userRol == 1 || userIsCreator){  
+      const deleteQuery = `DELETE FROM tareas WHERE id = ?`;
+      const [result] = await cnn.query(deleteQuery, [idTask]);
+      if (result.affectedRows === 1) {
+        return res.status(200).json({ message: "Tarea eliminada correctamente", success: true });
+      } else {
+        return res.status(500).json({ message: "Error al eliminar la tarea", success: false });
+      }
     }
   } catch (error) {
     return res.status(500).json({ message: "Error en el servidor", success: false, error: error });

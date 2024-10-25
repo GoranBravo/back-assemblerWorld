@@ -3,6 +3,7 @@
 @saveMarker = http://localhost:3000/user/saveMarker
 @deleteMarker = http://localhost:3000/user/deleteMarker
 @linkMarker = http://localhost:3000/user/linkMarker
+@taskUpload = http://localhost:3000/user/taskUpload
 @getMarkers = http://localhost:3000/user/getMarkers
 
 POST {{login}}
@@ -57,6 +58,18 @@ auth : eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFkbWluIiwiaWF0IjoxNzI4
 
 {
     "markerId" : "9"
+}
+
+###
+POST {{taskUpload}}
+#header
+Content-Type: application/json
+auth : eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFkbWluIiwiaWF0IjoxNzI4NjY5ODYxLCJleHAiOjMuNmUrMzB9.wtpa86BtgJnZ_EVppj1Ltz7GlI_X6Ih4FxGmr1q2RVo
+#body
+
+{
+    "title" : "Tarea 2",
+    "content" : "lorem"
 }
 
 ###
