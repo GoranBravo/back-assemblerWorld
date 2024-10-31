@@ -5,14 +5,17 @@
 @linkMarker = http://localhost:3000/user/linkMarker
 @taskUpload = http://localhost:3000/user/taskUpload
 @taskDelete = http://localhost:3000/user/taskDelete
+@taskEdit = http://localhost:3000/user/taskEdit
 @getMarkers = http://localhost:3000/user/getMarkers
+@getTask = http://localhost:3000/user/getTask
+@getAllTaskId = http://localhost:3000/user/getAllTaskId
 
 POST {{login}}
 Content-Type: application/json
 
 {
-    "email" : "goran@email",
-    "password" : "4321"
+    "email" : "admin",
+    "password" : "admin"
 }
 
 ###
@@ -65,7 +68,7 @@ auth : eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFkbWluIiwiaWF0IjoxNzI4
 POST {{taskUpload}}
 #header
 Content-Type: application/json
-auth : eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFkbWluIiwiaWF0IjoxNzI5OTEzMDk4LCJleHAiOjE3MzExMjI2OTh9.23agkfm7FwqjAmyUNHKxE6wMSUSI0FGw4rZw0fZC4ow
+auth : eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImdvcmFuQGVtYWlsLmNvbSIsImlhdCI6MTczMDM0MjEzNSwiZXhwIjoxNzMxNTUxNzM1fQ.NHF1YZa5OgOeMIMUEeqI9HXyO4_WWokQ41mS3TNzZ3Y
 #body
 
 {
@@ -77,11 +80,24 @@ auth : eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFkbWluIiwiaWF0IjoxNzI5
 POST {{taskDelete}}
 #header
 Content-Type: application/json
-auth : eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImdvcmFuQGVtYWlsIiwiaWF0IjoxNzI5OTEzMjQ0LCJleHAiOjE3MzExMjI4NDR9.BPPlzZLE1d7JK3XQwgDFzRHZ8lVh2usAk-xaSFqwBRM
+auth : eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFkbWluIiwiaWF0IjoxNzMwMzQyNTU5LCJleHAiOjE3MzE1NTIxNTl9.FPjZm2Shgdazgyj2MprjeQSRL1wFM2Bywz5r2Nn2vqw
 #body
 
 {
-    "idTask" : "4"
+    "idTask" : "6"
+}
+
+###
+POST {{taskEdit}}
+#header
+Content-Type: application/json
+auth : eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImdvcmFuQGVtYWlsLmNvbSIsImlhdCI6MTczMDM0MjEzNSwiZXhwIjoxNzMxNTUxNzM1fQ.NHF1YZa5OgOeMIMUEeqI9HXyO4_WWokQ41mS3TNzZ3Y
+#body
+
+{
+    "idTask" : "7",
+    "title" : "Hola!",
+    "content" : "testtesttestesttesttesttesttesttestesttesttesttesttesttestesttesttesttesttesttestesttesttesttesttesttestesttesttesttesttesttestesttesttest"
 }
 
 ###
@@ -89,8 +105,14 @@ GET {{getMarkers}}
 #header
 Content-Type: application/json
 auth: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFkbWluIiwiaWF0IjoxNzI5MDgyMzIxLCJleHAiOjE3MzAyOTE5MjF9.c-umqzl99Rxnq_hMBVdsbt6YOXbU4gKCXCI78Xw_NHs
-#body
 
-{
-    "email" : "admin"
-}
+###
+GET {{getTask}}
+#header
+Content-Type: application/json
+task: 7
+
+###
+GET {{getAllTaskId}}
+#header
+Content-Type: application/json
