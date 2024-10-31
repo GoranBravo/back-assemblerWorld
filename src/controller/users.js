@@ -241,7 +241,7 @@ export const taskUpload = async (req, res) => {
   }
 };
 
-export const taskDeleate = async (req, res) => {
+export const taskDelete = async (req, res) => {
   try {
     const cnn = await connect();
     const { idTask } = req.body;
@@ -273,14 +273,14 @@ export const taskDeleate = async (req, res) => {
       userIsCreator = true
     }
 
-    if (userRol == 1 || userIsCreator){  
+    if (userRol == 1 || userIsCreator){
       const deleteQuery = `DELETE FROM tareas WHERE id = ?`;
       const [result] = await cnn.query(deleteQuery, [idTask]);
       if (result.affectedRows === 1) {
         return res.status(200).json({ message: "Tarea eliminada correctamente", success: true });
-      } else {
-        return res.status(500).json({ message: "Error al eliminar la tarea", success: false });
       }
+    } else {
+      return res.status(500).json({ message: "Error al eliminar la tarea", success: false });
     }
   } catch (error) {
     return res.status(500).json({ message: "Error en el servidor", success: false, error: error });

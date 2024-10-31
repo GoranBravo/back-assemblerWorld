@@ -4,14 +4,15 @@
 @deleteMarker = http://localhost:3000/user/deleteMarker
 @linkMarker = http://localhost:3000/user/linkMarker
 @taskUpload = http://localhost:3000/user/taskUpload
+@taskDelete = http://localhost:3000/user/taskDelete
 @getMarkers = http://localhost:3000/user/getMarkers
 
 POST {{login}}
 Content-Type: application/json
 
 {
-    "email" : "admin",
-    "password" : "admin"
+    "email" : "goran@email",
+    "password" : "4321"
 }
 
 ###
@@ -21,7 +22,7 @@ Content-Type: application/json
 #body
 
 {
-    "email" : "goran@email.com",
+    "email" : "goran@email",
     "nombre" : "Goran",
     "password" : "4321"
 }
@@ -64,12 +65,23 @@ auth : eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFkbWluIiwiaWF0IjoxNzI4
 POST {{taskUpload}}
 #header
 Content-Type: application/json
-auth : eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFkbWluIiwiaWF0IjoxNzI4NjY5ODYxLCJleHAiOjMuNmUrMzB9.wtpa86BtgJnZ_EVppj1Ltz7GlI_X6Ih4FxGmr1q2RVo
+auth : eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFkbWluIiwiaWF0IjoxNzI5OTEzMDk4LCJleHAiOjE3MzExMjI2OTh9.23agkfm7FwqjAmyUNHKxE6wMSUSI0FGw4rZw0fZC4ow
 #body
 
 {
     "title" : "Tarea 2",
     "content" : "lorem"
+}
+
+###
+POST {{taskDelete}}
+#header
+Content-Type: application/json
+auth : eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImdvcmFuQGVtYWlsIiwiaWF0IjoxNzI5OTEzMjQ0LCJleHAiOjE3MzExMjI4NDR9.BPPlzZLE1d7JK3XQwgDFzRHZ8lVh2usAk-xaSFqwBRM
+#body
+
+{
+    "idTask" : "4"
 }
 
 ###
