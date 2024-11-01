@@ -99,11 +99,12 @@ export const saveMarker = async (req, res) => {
     const { markerLink, nombre } = req.body;
     const cnn = await connect();
 
+
     const markerQuery = `SELECT * FROM marcadores WHERE link = ?`;
-    const [markerResult] = await cnn.query(markerQuery, [markerLink]);
-    const markerId1 = markerResult[0].id;
+    const [markerResult] = await cnn.query(markerQuery, [markerLink]);    
 
     if (markerResult.length > 0) {
+      const markerId1 = markerResult[0].id;
       return res
         .status(400)
         .json({
