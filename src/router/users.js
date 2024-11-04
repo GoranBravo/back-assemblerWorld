@@ -1,7 +1,7 @@
 //archivo para manejar las rutas de usuarios
 
 import { Router } from "express";
-import { auth, createUsers, deleteMarker, getUserMarkers, logIn, saveMarker, linkMarker, taskUpload, taskDelete, taskEdit, getTask, getAllTaskId} from "../controller/users";
+import { auth, createUsers, deleteMarker, getUserMarkers, logIn, saveMarker, linkMarker, taskUpload, taskDelete, taskEdit, getTask, getAllTaskId, deleteUser, getUser, updateUser} from "../controller/users";
 
 //objeto para manejo de url
 const routerUsers = Router();
@@ -73,6 +73,22 @@ routerUsers.post("/user/taskEdit", auth, taskEdit);
 
 /**
  * @swagger
+ * /deleteUser:
+ *  post:
+ *      sumary: delete user account
+ */
+routerUsers.post("/user/deleteUser", auth, deleteUser);
+
+/**
+ * @swagger
+ * /updateUser:
+ *  post:
+ *      sumary: update user account
+ */
+routerUsers.post("/user/updateUser", auth, updateUser);
+
+/**
+ * @swagger
  * /getUserMarker:
  *  get:
  *      sumary: get markers
@@ -94,5 +110,13 @@ routerUsers.get("/user/getTask", getTask);
  *      sumary: get all tasks id
  */
 routerUsers.get("/user/getAllTaskId", getAllTaskId);
+
+/**
+ * @swagger
+ * /getUser:
+ *  get:
+ *      sumary: get user name & email
+ */
+routerUsers.get("/user/getUser", auth, getUser);
 
 export default routerUsers;

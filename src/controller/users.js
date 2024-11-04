@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
 import { connect } from "../databases";
 const claveSecreta = process.env.SECRET_KEY;
 
@@ -10,7 +11,8 @@ export const logIn = async (req, res) => {
     const value = [email];
     const [result] = await cnn.query(q, value);
     if (result.length > 0) {
-      if (result[0].password_hash === password) {
+      const isMatch = await bcrypt.compare(password, result[0].password_hash);
+      if (isMatch) {
         const token = getToken({ email: email });
         return res
           .status(200)
@@ -42,6 +44,7 @@ const validate = async (campo, valor, tabla, cnn) => {
 
 export const createUsers = async (req, res) => {
   try {
+    const saltRounds = 5;
     const cnn = await connect();
     const { email, nombre, password } = req.body;
 
@@ -51,10 +54,11 @@ export const createUsers = async (req, res) => {
         .status(400)
         .json({ message: "El email ya está en uso", success: false });
     }
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
 
     const [result] = await cnn.query(
       "INSERT INTO usuarios (email, nombre, password_hash) VALUES (?,?,?)",
-      [email, nombre, password]
+      [email, nombre, hashedPassword]
     );
     if (result.affectedRows === 1) {
       return res
@@ -66,12 +70,10 @@ export const createUsers = async (req, res) => {
         .json({ message: "No se creó el usuario", success: false });
     }
   } catch (error) {
-    return res
-      .status(500)
-      .json({
-        message: error.message || "Error en el servidor",
-        success: false,
-      });
+    return res.status(500).json({
+      message: error.message || "Error en el servidor",
+      success: false,
+    });
   }
 };
 
@@ -99,19 +101,16 @@ export const saveMarker = async (req, res) => {
     const { markerLink, nombre } = req.body;
     const cnn = await connect();
 
-
     const markerQuery = `SELECT * FROM marcadores WHERE link = ?`;
-    const [markerResult] = await cnn.query(markerQuery, [markerLink]);    
+    const [markerResult] = await cnn.query(markerQuery, [markerLink]);
 
     if (markerResult.length > 0) {
       const markerId1 = markerResult[0].id;
-      return res
-        .status(400)
-        .json({
-          message: "El marcador ya existe",
-          success: false,
-          markerId: markerId1,
-        });
+      return res.status(400).json({
+        message: "El marcador ya existe",
+        success: false,
+        markerId: markerId1,
+      });
     }
 
     const insertMarkerQuery = `INSERT INTO marcadores (nombre, link) VALUES (?, ?)`;
@@ -120,31 +119,25 @@ export const saveMarker = async (req, res) => {
     if (result.affectedRows === 1) {
       const [markerId] = await cnn.query(markerQuery, [markerLink]);
       const markerId0 = markerId[0].id;
-      return res
-        .status(200)
-        .json({
-          message: "Marcador guardado correctamente",
-          success: true,
-          markerId: markerId0,
-        });
+      return res.status(200).json({
+        message: "Marcador guardado correctamente",
+        success: true,
+        markerId: markerId0,
+      });
     } else {
-      return res
-        .status(500)
-        .json({
-          message: "Error al guardar el marcador",
-          success: false,
-          markerId: -1,
-        });
-    }
-  } catch (error) {
-    return res
-      .status(500)
-      .json({
-        message: "Error en el servidor",
+      return res.status(500).json({
+        message: "Error al guardar el marcador",
         success: false,
         markerId: -1,
-        error: error,
       });
+    }
+  } catch (error) {
+    return res.status(500).json({
+      message: "Error en el servidor",
+      success: false,
+      markerId: -1,
+      error: error,
+    });
   }
 };
 
@@ -258,19 +251,15 @@ export const linkMarker = async (req, res) => {
       const [checkResult] = await cnn.query(checkQuery, [userId, markerId]);
 
       if (checkResult.length === 0) {
-        return res
-          .status(200)
-          .json({
-            message: "Marcador desvinculado correctamente",
-            success: true,
-          });
+        return res.status(200).json({
+          message: "Marcador desvinculado correctamente",
+          success: true,
+        });
       } else {
-        return res
-          .status(500)
-          .json({
-            message: "Error al desvincular el marcador",
-            success: false,
-          });
+        return res.status(500).json({
+          message: "Error al desvincular el marcador",
+          success: false,
+        });
       }
     }
 
@@ -378,12 +367,10 @@ export const taskDelete = async (req, res) => {
       [idTask]
     );
     if (userTaskResult.length === 0) {
-      return res
-        .status(404)
-        .json({
-          message: "Error: No se encontro el usuario creador.",
-          success: false,
-        });
+      return res.status(404).json({
+        message: "Error: No se encontro el usuario creador.",
+        success: false,
+      });
     }
     const creatorId = userTaskResult[0].userId;
 
@@ -400,20 +387,16 @@ export const taskDelete = async (req, res) => {
           .status(200)
           .json({ message: "Tarea eliminada correctamente", success: true });
       } else {
-        return res
-          .status(500)
-          .json({
-            message: "Error desconocido al eliminar la tarea",
-            success: false,
-          });
-      }
-    } else {
-      return res
-        .status(500)
-        .json({
-          message: "Error al eliminar la tarea, no tienes permisos",
+        return res.status(500).json({
+          message: "Error desconocido al eliminar la tarea",
           success: false,
         });
+      }
+    } else {
+      return res.status(500).json({
+        message: "Error al eliminar la tarea, no tienes permisos",
+        success: false,
+      });
     }
   } catch (error) {
     return res
@@ -463,20 +446,16 @@ export const taskEdit = async (req, res) => {
           .status(200)
           .json({ message: "Tarea actualizada correctamente", success: true });
       } else {
-        return res
-          .status(500)
-          .json({
-            message: "Error desconocido al actualizar la tarea",
-            success: false,
-          });
-      }
-    } else {
-      return res
-        .status(403)
-        .json({
-          message: "No tienes permisos para editar esta tarea",
+        return res.status(500).json({
+          message: "Error desconocido al actualizar la tarea",
           success: false,
         });
+      }
+    } else {
+      return res.status(403).json({
+        message: "No tienes permisos para editar esta tarea",
+        success: false,
+      });
     }
   } catch (error) {
     return res
@@ -489,7 +468,7 @@ export const getTask = async (req, res) => {
   try {
     const cnn = await connect();
     const idTask = req.headers["task"];
- 
+
     const query = `
       SELECT tareas.title, tareas.content, usuarios.nombre AS creatorName
       FROM tareas
@@ -525,14 +504,136 @@ export const getAllTaskId = async (req, res) => {
     const [tasksResult] = await cnn.query(query);
 
     if (tasksResult.length === 0) {
-      return res.status(404).json({ message: "No se encontraron tareas", success: false });
+      return res
+        .status(404)
+        .json({ message: "No se encontraron tareas", success: false });
     }
 
     return res.status(200).json({
       taskIds: tasksResult.map((task) => task.id),
-      success: true
+      success: true,
     });
   } catch (error) {
-    return res.status(500).json({ message: "Error en el servidor", success: false, error });
+    return res
+      .status(500)
+      .json({ message: "Error en el servidor", success: false, error });
+  }
+};
+
+export const deleteUser = async (req, res) => {
+  try {
+    const cnn = await connect();
+    const { email } = req.payload;
+
+    const emailExists = await validate("email", email, "usuarios", cnn);
+    if (!emailExists) {
+      return res
+        .status(404)
+        .json({ message: "Error, el usuario no existe", success: false });
+    }
+
+    const [result] = await cnn.query("DELETE FROM usuarios WHERE email = ?", [
+      email,
+    ]);
+
+    if (result.affectedRows === 1) {
+      return res
+        .status(200)
+        .json({ message: "Se elimino el usuario", success: true });
+    } else {
+      return res
+        .status(500)
+        .json({ message: "Error: No se elimino el usuario", success: false });
+    }
+  } catch (error) {
+    return res.status(500).json({
+      message: error.message || "Error en el servidor",
+      success: false,
+    });
+  }
+};
+
+export const updateUser = async (req, res) => {
+  try {
+    const saltRounds = 10;
+    const cnn = await connect();
+    const { email } = req.payload;
+    const { mail, nombre, password, oldPassword } = req.body;
+
+    const emailExists = await validate("email", email, "usuarios", cnn);
+    if (!emailExists) {
+      return res
+        .status(404)
+        .json({ message: "Error, el usuario no existe", success: false });
+    }
+
+    const q = `SELECT password_hash FROM usuarios WHERE email=?`;
+    const value = [email];
+    const [resultlogin] = await cnn.query(q, value);
+    if (resultlogin.length > 0) {
+      const isMatch = await bcrypt.compare(oldPassword, resultlogin[0].password_hash);
+      if (isMatch) {
+        const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+        const [result] = await cnn.query(
+          "UPDATE usuarios SET nombre = ?, password_hash = ? WHERE email = ?",
+          [nombre, hashedPassword, mail]
+        );
+
+        if (result.affectedRows === 1) {
+          return res
+            .status(200)
+            .json({ message: "Se actualizo el usuario", success: true });
+        } else {
+          return res.status(500).json({
+            message: "Error: No se actualizo el usuario",
+            success: false,
+          });
+        }
+      } else {
+        return res.status(500).json({
+          message: "Error: Contraseña Incorrecta",
+          success: false,
+        });
+      }
+    }
+  } catch (error) {
+    return res.status(500).json({
+      message: error.message || "Error en el servidor",
+      success: false,
+    });
+  }
+};
+
+export const getUser = async (req, res) => {
+  try {
+    const cnn = await connect();
+    const { email } = req.payload;
+
+    const [rows] = await cnn.query(
+      "SELECT email, nombre FROM usuarios WHERE email = ?",
+      [email]
+    );
+
+    const nombre = rows[0].nombre;
+    const mail = rows[0].email;
+
+    if (nombre) {
+      return res.status(200).json({
+        message: "Se obtubo el usuario",
+        success: true,
+        nombre: nombre,
+        mail: mail,
+      });
+    } else {
+      return res
+        .status(500)
+        .json({ message: "Error: No se encontro el usuario", success: false });
+    }
+  } catch (error) {
+    return res.status(500).json({
+      message: error.message || "Error en el servidor",
+      success: false,
+    });
   }
 };
