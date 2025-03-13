@@ -7,6 +7,7 @@ export const logIn = async (req, res) => {
   try {
     const { email, password } = req.body;
     const cnn = await connect();
+
     const q = `SELECT password_hash FROM usuarios WHERE email=?`;
     const value = [email];
     const [result] = await cnn.query(q, value);
@@ -475,8 +476,13 @@ export const getTask = async (req, res) => {
       JOIN usuarios ON tareas.userId = usuarios.id
       WHERE tareas.id = ?
     `;
-    const [taskResult] = await cnn.query(query, [idTask]);
-
+    let [taskResult] = await cnn.query(query, [idTask]);
+    if (taskResult.length === 0) {
+      [taskResult] = await cnn.query(
+        `SELECT tareas.title, tareas.content FROM tareas WHERE tareas.id = ?`,
+        [idTask]
+      );
+    }
     if (taskResult.length === 0) {
       return res
         .status(404)
@@ -571,7 +577,10 @@ export const updateUser = async (req, res) => {
     const value = [email];
     const [resultlogin] = await cnn.query(q, value);
     if (resultlogin.length > 0) {
-      const isMatch = await bcrypt.compare(oldPassword, resultlogin[0].password_hash);
+      const isMatch = await bcrypt.compare(
+        oldPassword,
+        resultlogin[0].password_hash
+      );
       if (isMatch) {
         const hashedPassword = await bcrypt.hash(password, saltRounds);
 
